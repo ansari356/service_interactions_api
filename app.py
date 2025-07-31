@@ -4,12 +4,10 @@ import pandas as pd
 
 app = Flask(__name__)
 
-# تحميل البيانات من ملف Excel
 def load_data_from_excel(file_path):
     try:
         df = pd.read_excel(file_path)
         df.fillna('', inplace=True)
-        # تحويل التاريخ إلى string للتأكد من JSON compatibility
         if 'interaction_date' in df.columns:
             df['interaction_date'] = df['interaction_date'].astype(str)
         if 'follow_up_required' in df.columns:
@@ -19,7 +17,6 @@ def load_data_from_excel(file_path):
         print(f"❌ Error loading Excel file: {e}")
         return []
 
-# تحميل البيانات من ملف Excel
 service_interactions_data = load_data_from_excel('service_interactions.xlsx')
 
 @app.route('/')
@@ -36,7 +33,6 @@ def home():
 
 @app.route('/api/interactions', methods=['GET'])
 def get_all_interactions():
-    """استرجاع جميع التفاعلات مع إمكانية الـ pagination"""
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 10, type=int)
     
@@ -53,7 +49,6 @@ def get_all_interactions():
 
 @app.route('/api/interactions/<interaction_id>', methods=['GET'])
 def get_interaction_by_id(interaction_id):
-    """استرجاع تفاعل محدد"""
     interaction = next((item for item in service_interactions_data 
                       if str(item["interaction_id"]) == interaction_id), None)
     
@@ -64,7 +59,6 @@ def get_interaction_by_id(interaction_id):
 
 @app.route('/api/interactions/customer/<customer_id>', methods=['GET'])
 def get_customer_interactions(customer_id):
-    """استرجاع تفاعلات عميل محدد"""
     customer_interactions = [item for item in service_interactions_data 
                            if str(item["customer_id"]) == customer_id]
     
@@ -76,10 +70,8 @@ def get_customer_interactions(customer_id):
 
 @app.route('/api/interactions', methods=['POST'])
 def create_interaction():
-    """إضافة تفاعل جديد"""
     new_interaction = request.json
 
-    # الحقول المطلوبة
     required_fields = ['interaction_id', 'customer_id', 'interaction_type']
     for field in required_fields:
         if field not in new_interaction:
